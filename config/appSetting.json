@@ -1,0 +1,37 @@
+{
+  "ConnectionString": {
+    "Default": "host=127.0.0.1 port=5432 dbname=KitaUndang user=postgres password=reza sslmode=disable"
+  },
+  "App": {
+    "ServerAddress": "localhost",
+    "BackEndAddress": "http://localhost:8080/",
+    "FrontEndAddress": "http://localhost:4200/",
+    "Debug": true
+  },
+  "NSQ": {
+    "NSQ": {
+      "ChannelSize": 10,
+      "Enabled": true
+    },
+    "Redis": {
+      "Url": "tcp://devel-redis.tkpd:6379/0?timeout=10s&maxidle=10",
+      "MaxActive": 100,
+      "MaxIdle": 50
+    },
+    "NSQLookupd": {
+      "Url": "127.0.0.1",
+      "TCPPort": "4160",
+      "HTTPPort": "4161",
+      "TimeLimitRequeue": 60,
+      "MaxAttemptRequeue": 0
+    },
+    "NSQD":
+      {
+        "Server1": {
+          "NsqdIP": "127.0.0.1",
+          "NsqdTCPPort": "4150",
+          "NsqdHTTPPort": "4151"
+        }
+      }
+  }
+}
