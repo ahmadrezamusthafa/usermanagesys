@@ -104,10 +104,8 @@ func (a *GNSQModule) AddConsumer(topics []string, channel string, serviceHandler
 
 		currTopic := topics[i]
 		q.AddHandler(nsq.HandlerFunc(func(message *nsq.Message) error {
-			// Check if already processed (duplicate)
 			duplicate := GetRedisNSQ(channel, string(message.ID[:]))
 
-			// check if message expired / more than 1 hour
 			if getTimestampDifferentMinute(message.Timestamp) > a.Configuration.NSQLookupd.TimeLimitRequeue {
 				message.Finish()
 			}

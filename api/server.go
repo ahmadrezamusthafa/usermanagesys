@@ -17,16 +17,19 @@ type Server struct {
 	Configuration *configuration.Configuration
 	NsqModule     *gnsq.GNSQModule
 	UserService   *service.UserService
+	MainService   *service.MainService
 }
 
 func NewServer(config *configuration.Configuration,
 	nsqModule *gnsq.GNSQModule,
 	userService *service.UserService,
+	mainService *service.MainService,
 ) *Server {
 	SERVER = Server{
 		Configuration: config,
 		NsqModule:     nsqModule,
 		UserService:   userService,
+		MainService:   mainService,
 	}
 
 	return &SERVER
@@ -37,6 +40,7 @@ func (a *Server) NewRouter() *mux.Router {
 
 	router.HandleFunc("/user/get_users", a.UserService.GetUsers).Methods("GET")
 	router.HandleFunc("/user/get_users_paging", a.UserService.GetUsersPaging).Methods("GET")
+	router.HandleFunc("/publish", a.MainService.PublishNSQ).Methods("GET")
 
 	return router
 }

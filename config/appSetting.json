@@ -28,7 +28,7 @@
     },
     "NSQD":
       {
-        "Server1": {
+        "ServerLokal": {
           "NsqdIP": "127.0.0.1",
           "NsqdTCPPort": "4150",
           "NsqdHTTPPort": "4151"

@@ -12,6 +12,9 @@ import (
 	"tokopedia.se.training/Project1/usermanagesys/api/repository/dbo"
 )
 
+const DateFormat string = "2006-01-02"
+const DateTimeFormat string = "2006-01-02 15:04:05"
+
 type TokopediaUserRepository struct {
 	database *sql.DB
 }
@@ -28,7 +31,7 @@ func (repository *TokopediaUserRepository) GetAll(maxResult int) (user []dbo.Tok
 
 	tokopediaUser := []dbo.TokopediaUser{}
 	query := fmt.Sprintf(`select user_id, user_name, user_email, user_pwd, status, full_name, sex, birth_date, location, msisdn, create_time, update_time
-											from ws_user order by full_name asc limit %d`, maxResult)
+											from ws_user order by user_id asc limit %d`, maxResult)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
@@ -58,6 +61,25 @@ func (repository *TokopediaUserRepository) GetAll(maxResult int) (user []dbo.Tok
 			return nil, err
 		}
 
+		var age time.Duration
+		if data.BirthDate != nil {
+			age = time.Since(*data.BirthDate)
+			age = age / time.Hour / 24 / 365
+
+			a := data.BirthDate.Format(DateFormat)
+			data.StrBirthDate = &a
+		}
+		data.Age = &age
+
+		if data.CreateTime != nil {
+			a := data.CreateTime.Format(DateTimeFormat)
+			data.StrCreateTime = &a
+		}
+		if data.UpdateTime != nil {
+			a := data.UpdateTime.Format(DateTimeFormat)
+			data.StrUpdateTime = &a
+		}
+
 		tokopediaUser = append(tokopediaUser, data)
 	}
 
@@ -69,7 +91,7 @@ func (repository *TokopediaUserRepository) GetAllPaging(page int, maxResult int,
 	page = (maxResult * page) - maxResult
 	tokopediaUser := []dbo.TokopediaUser{}
 	query := fmt.Sprintf(`select user_id, user_name, user_email, user_pwd, status, full_name, sex, birth_date, location, msisdn, create_time, update_time
-											from ws_user %s order by full_name asc limit %d offset %d`, generateFilterWhereStatement(filter), maxResult, page)
+											from ws_user %s order by user_id asc limit %d offset %d`, generateFilterWhereStatement(filter), maxResult, page)
 
 	fmt.Println(query)
 
@@ -99,6 +121,25 @@ func (repository *TokopediaUserRepository) GetAllPaging(page int, maxResult int,
 
 		if err != nil {
 			return nil, err
+		}
+
+		var age time.Duration
+		if data.BirthDate != nil {
+			age = time.Since(*data.BirthDate)
+			age = age / time.Hour / 24 / 365
+
+			a := data.BirthDate.Format(DateFormat)
+			data.StrBirthDate = &a
+		}
+		data.Age = &age
+
+		if data.CreateTime != nil {
+			a := data.CreateTime.Format(DateTimeFormat)
+			data.StrCreateTime = &a
+		}
+		if data.UpdateTime != nil {
+			a := data.UpdateTime.Format(DateTimeFormat)
+			data.StrUpdateTime = &a
 		}
 
 		tokopediaUser = append(tokopediaUser, data)

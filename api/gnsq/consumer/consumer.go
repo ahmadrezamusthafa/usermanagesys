@@ -8,6 +8,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"log"
 	"tokopedia.se.training/Project1/usermanagesys/api"
+	. "tokopedia.se.training/Project1/usermanagesys/api/gnsq"
 )
 
 var svr *api.Server
@@ -16,11 +17,11 @@ func InitConsumer() {
 	svr = &api.SERVER
 
 	//tambah consumer
-	svr.NsqModule.AddConsumer([]string{"TOPIC1"}, "tes", listener)
+	svr.NsqModule.AddConsumer([]string{TOPIC_VISITOR_COUNTER}, CHANNEL_VISITOR_COUNTER, listener)
 }
 
 func listener(message *nsq.Message, topic string) bool {
-	span, _ := opentracing.StartSpanFromContext(context.Background(), "NSQConsumer.Topic1")
+	span, _ := opentracing.StartSpanFromContext(context.Background(), "NSQConsumer."+TOPIC_VISITOR_COUNTER)
 	defer span.Finish()
 
 	json, err := jsoniter.Marshal(context.Background())

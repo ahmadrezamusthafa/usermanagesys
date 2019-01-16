@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"github.com/json-iterator/go"
+	"log"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -78,13 +79,13 @@ func (s *UserService) GetUsersPaging(w http.ResponseWriter, r *http.Request) {
 	queryValues := r.URL.Query()
 	page, err := strconv.Atoi(queryValues.Get("page"))
 	if err != nil {
-		resWriter.WriteError(err.Error())
-		return
+		log.Println(err.Error())
+		page = 1
 	}
 	maxResult, err := strconv.Atoi(queryValues.Get("max_result"))
 	if err != nil {
-		resWriter.WriteError(err.Error())
-		return
+		log.Println(err.Error())
+		maxResult = 10
 	}
 
 	var mapFilter = make(map[string]interface{})
