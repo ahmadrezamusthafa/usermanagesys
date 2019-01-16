@@ -37,12 +37,5 @@ func listener(message *nsq.Message, topic string) bool {
 		svr.NsqModule.SetRedisNSQ(TOPIC_VISITOR_COUNTER, 0, fmt.Sprintf("%d", counter))
 	}
 
-	//debug(fmt.Sprintf("RECEIV topic %s: %s", topic, message.Body))
-	/*err := jsoniter.Unmarshal(message.Body, &options)
-	if err != nil {
-		contextlib.PrintErrorCtx(ctx, err, "LogIris")
-		return false
-	}*/
-
 	return false
 }

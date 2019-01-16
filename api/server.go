@@ -1,10 +1,13 @@
 package api
 
 import (
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	"log"
 	"net/http"
+	"path"
+	"runtime"
 	"tokopedia.se.training/Project1/usermanagesys/api/configuration"
 	"tokopedia.se.training/Project1/usermanagesys/api/gnsq"
 	"tokopedia.se.training/Project1/usermanagesys/api/service"
@@ -36,7 +39,14 @@ func NewServer(config *configuration.Configuration,
 }
 
 func (a *Server) NewRouter() *mux.Router {
+
+	_, runningFile, _, _ := runtime.Caller(1)
+	frontendPath := path.Join(path.Dir(runningFile), "../../frontend")
+	fmt.Println(frontendPath)
+
 	router := mux.NewRouter().StrictSlash(true)
+
+	router.PathPrefix("/web/").Handler(http.StripPrefix("/web/", http.FileServer(http.Dir(frontendPath))))
 
 	router.HandleFunc("/user/get_users", a.UserService.GetUsers).Methods("GET")
 	router.HandleFunc("/user/get_users_paging", a.UserService.GetUsersPaging).Methods("GET")
@@ -50,6 +60,7 @@ func (s *Server) Run() {
 	log.Println("Setup HTTP Server")
 	var port = processor.ExtractServerAddressPort(s.Configuration.App.BackEndAddress)
 	log.Println("Starting server at http://localhost:" + port + "/")
+	log.Println("Starting web at http://localhost:" + port + "/web/")
 
 	log.Println("Initialize Router")
 	router := s.NewRouter()
