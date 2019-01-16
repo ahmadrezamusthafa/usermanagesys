@@ -54,8 +54,8 @@ func serverInit() {
 	server.Run()
 }
 
-func nsqPublisherInit(server *api.Server){
-	server.MainService.InitNsqPublisher(api.SERVER.NsqModule.Producer["ServerLokal"])
+func nsqPublisherInit(server *api.Server) {
+	server.MainService.InitNsqPublisher(api.SERVER.NsqModule.Producer["ServerLokal"], api.SERVER.NsqModule)
 }
 
 func main() {

@@ -41,6 +41,7 @@ func (a *Server) NewRouter() *mux.Router {
 	router.HandleFunc("/user/get_users", a.UserService.GetUsers).Methods("GET")
 	router.HandleFunc("/user/get_users_paging", a.UserService.GetUsersPaging).Methods("GET")
 	router.HandleFunc("/publish", a.MainService.PublishNSQ).Methods("GET")
+	router.HandleFunc("/get_visitor_count", a.MainService.GetVisitorCount).Methods("GET")
 
 	return router
 }
