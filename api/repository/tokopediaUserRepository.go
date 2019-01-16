@@ -189,7 +189,7 @@ func generateFilterWhereStatement(strColumn *map[string]interface{}) string {
 
 				prefix += fmt.Sprintf(strFormat, func() string {
 					if index != 0 {
-						return " and "
+						return " or "
 					}
 					return ""
 				}(), key, str)
