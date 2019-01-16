@@ -1,7 +1,8 @@
 package gnsq
 
-type GNSQTopic struct {
-	Topic string
+type GNSQData struct {
+	Topic   string `json:"topic"`
+	Message string `json:"message"`
 }
 
 const (
@@ -9,5 +10,5 @@ const (
 )
 
 const (
-	CHANNEL_VISITOR_COUNTER string = TOPIC_VISITOR_COUNTER + ".CH"
+	CHANNEL_VISITOR_COUNTER = TOPIC_VISITOR_COUNTER + ".CH"
 )

@@ -2,9 +2,11 @@ package service
 
 import (
 	"fmt"
+	"github.com/json-iterator/go"
 	"github.com/nsqio/go-nsq"
 	"net/http"
 	"tokopedia.se.training/Project1/usermanagesys/api/configuration"
+	"tokopedia.se.training/Project1/usermanagesys/api/gnsq"
 	"tokopedia.se.training/Project1/usermanagesys/api/response"
 )
 
@@ -25,8 +27,6 @@ func (service *MainService) InitNsqPublisher(nsqPub *nsq.Producer) {
 }
 
 func (service *MainService) PublishNSQ(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	resWriter := response.New(w)
 
 	defer func() {
@@ -42,14 +42,16 @@ func (service *MainService) PublishNSQ(w http.ResponseWriter, r *http.Request) {
 		resWriter.WriteError("Data is required")
 		return
 	}
-	topic := queryValues.Get("topic")
-	if data == "" {
-		resWriter.WriteError("Topic is required")
+
+	pubData := gnsq.GNSQData{}
+	err := jsoniter.Unmarshal([]byte(data), &pubData)
+	if err != nil {
+		resWriter.WriteError("Unmarshal failed")
 		return
 	}
 
 	//publish nsq
-	nsqPublisher.Publish(topic, []byte(data))
+	nsqPublisher.Publish(pubData.Topic, []byte(pubData.Message))
 
 	resWriter.WriteSuccess("Successfully publish")
 	return

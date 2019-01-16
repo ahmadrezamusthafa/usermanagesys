@@ -15,7 +15,7 @@
       "Enabled": true
     },
     "Redis": {
-      "Url": "tcp://devel-redis.tkpd:6379/0?timeout=10s&maxidle=10",
+      "Url": "127.0.0.1:6379",
       "MaxActive": 100,
       "MaxIdle": 50
     },
