@@ -25,7 +25,7 @@ func (m *ResponseModul) WriteSuccess(objPost interface{}) {
 	var apiResult = dto.APIResultDto{Error: nil, Result: objPost, Success: true}
 	var result, err = json.Marshal(apiResult)
 	if err != nil {
-		http.Error(m, err.Error(), http.StatusInternalServerError)
+		http.Error(m.resWriter, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	m.resWriter.Write(result)
@@ -37,7 +37,7 @@ func (m *ResponseModul) WriteError(errMsg string) {
 	var apiResult = dto.APIResultDto{Error: &errMsg, Result: nil, Success: false}
 	var result, err = json.Marshal(apiResult)
 	if err != nil {
-		http.Error(m, err.Error(), http.StatusInternalServerError)
+		http.Error(m.resWriter, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	m.resWriter.Write(result)
@@ -49,7 +49,7 @@ func (m *ResponseModul) WriteBadRequest(errMsg string) {
 	var apiResult = dto.APIResultDto{Error: &errMsg, Result: nil, Success: false}
 	var result, err = json.Marshal(apiResult)
 	if err != nil {
-		http.Error(m, err.Error(), http.StatusInternalServerError)
+		http.Error(m.resWriter, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	m.resWriter.Write(result)
@@ -61,7 +61,7 @@ func (m *ResponseModul) WriteUnauthorized(errMsg string) {
 	var apiResult = dto.APIResultDto{Error: &errMsg, Result: nil, Success: false}
 	var result, err = json.Marshal(apiResult)
 	if err != nil {
-		http.Error(m, err.Error(), http.StatusInternalServerError)
+		http.Error(m.resWriter, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	m.resWriter.Write(result)

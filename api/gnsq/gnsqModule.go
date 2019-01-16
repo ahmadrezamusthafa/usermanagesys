@@ -9,6 +9,7 @@ import (
 	"time"
 	"tokopedia.se.training/Project1/usermanagesys/api/configuration"
 	"tokopedia.se.training/Project1/usermanagesys/api/configuration/dto"
+	. "tokopedia.se.training/Project1/usermanagesys/api/redis"
 )
 
 const (
@@ -16,12 +17,8 @@ const (
 )
 
 type GNSQModule struct {
-	Configuration         *dto.NSQDto
-	Producer              map[string]*nsq.Producer
-	ChEmailRefund         chan *nsq.Message
-	ChReactivateVoucher   chan *nsq.Message
-	ChReactivateMPVoucher chan *nsq.Message
-	ChCreateVoucher       chan *nsq.Message
+	Configuration *dto.NSQDto
+	Producer      map[string]*nsq.Producer
 }
 
 var redisPool *redis.Pool
@@ -40,33 +37,7 @@ func NewNSQModule(config *configuration.Configuration) *GNSQModule {
 }
 
 func redisConnectNSQ(uri string, maxActive, maxIdle int) {
-	redisPool = NewPool(uri, "", maxActive, maxIdle)
-}
-
-func NewPool(server, password string, maxActive, maxIdle int) *redis.Pool {
-	return &redis.Pool{
-		MaxIdle:     maxIdle,
-		MaxActive:   maxActive,
-		IdleTimeout: 240 * time.Second,
-		Wait:        true,
-		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", server)
-			if err != nil {
-				return nil, err
-			}
-			if password != "" {
-				if _, err := c.Do("AUTH", password); err != nil {
-					c.Close()
-					return nil, err
-				}
-			}
-			return c, err
-		},
-		TestOnBorrow: func(c redis.Conn, t time.Time) error {
-			_, err := c.Do("PING")
-			return err
-		},
-	}
+	redisPool = InitRedisPool(uri, "", maxActive, maxIdle)
 }
 
 func (a *GNSQModule) InitNSQProducer() error {
@@ -104,28 +75,19 @@ func (a *GNSQModule) AddConsumer(topics []string, channel string, serviceHandler
 
 		currTopic := topics[i]
 		q.AddHandler(nsq.HandlerFunc(func(message *nsq.Message) error {
-			// Check if already processed (duplicate)
-			duplicate := GetRedisNSQ(channel, string(message.ID[:]))
-
-			// check if message expired / more than 1 hour
 			if getTimestampDifferentMinute(message.Timestamp) > a.Configuration.NSQLookupd.TimeLimitRequeue {
 				message.Finish()
 			}
 
-			if duplicate != "1" {
-				log.Println(fmt.Sprintf("Got a message: %s", message.Body))
+			log.Println(fmt.Sprintf("terima %s", message.Body))
 
-				isRequeue := serviceHandler(message, currTopic)
+			isRequeue := serviceHandler(message, currTopic)
 
-				if isRequeue == true {
-					message.Requeue(-1)
-				} else {
-					SetRedisNSQ(channel, string(message.ID[:]), 600, "1")
-					message.Finish()
-				}
-
+			if isRequeue == true {
+				message.Requeue(-1)
 			} else {
-				log.Println(channel, string(message.ID[:]), ", is duplicate")
+				a.SetRedisNSQ(channel, 600, "1")
+				message.Finish()
 			}
 
 			return nil
@@ -141,16 +103,16 @@ func (a *GNSQModule) AddConsumer(topics []string, channel string, serviceHandler
 	return nil
 }
 
-func GetKeyRedisNSQ(types string, id string) string {
-	key := fmt.Sprintf("nsq:%s:%s", strings.ToLower(types), strings.ToLower(id))
+func GetKeyRedisNSQ(channel string) string {
+	key := fmt.Sprintf("nsq:%s", strings.ToLower(channel))
 	return key
 }
 
-func DeleteRedisNSQ(types string, id string) {
+func (a *GNSQModule) DeleteRedisNSQ(channel string) {
 	c := redisPool.Get()
 	defer c.Close()
 
-	key := GetKeyRedisNSQ(types, id)
+	key := GetKeyRedisNSQ(channel)
 
 	_, err := redis.Int(c.Do("DEL", key))
 	if err != nil {
@@ -158,25 +120,26 @@ func DeleteRedisNSQ(types string, id string) {
 	}
 }
 
-func GetRedisNSQ(types string, id string) string {
+func (a *GNSQModule) GetRedisNSQ(channel string) string {
 	c := redisPool.Get()
 	defer c.Close()
 
-	key := GetKeyRedisNSQ(types, id)
+	key := GetKeyRedisNSQ(channel)
 
 	value, err := redis.String(c.Do("GET", key))
 	if err != nil && err != redis.ErrNil {
 		return ""
 	}
 
+	fmt.Println("GET", key)
 	return value
 }
 
-func SetRedisNSQ(types string, id string, expire int, value string) {
+func (a *GNSQModule) SetRedisNSQ(channel string, expire int, value string) {
 	c := redisPool.Get()
 	defer c.Close()
 
-	key := GetKeyRedisNSQ(types, id)
+	key := GetKeyRedisNSQ(channel)
 
 	var t int
 
@@ -187,6 +150,7 @@ func SetRedisNSQ(types string, id string, expire int, value string) {
 	}
 
 	redis.String(c.Do("SETEX", key, t, value))
+	fmt.Println("SETEX", key, value)
 }
 
 func getTimestampDifferentMinute(timeStamp int64) (minutes int) {

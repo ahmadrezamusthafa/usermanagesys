@@ -12,53 +12,52 @@ import (
 
 var config *configuration.Configuration
 
-type Application struct {
-	Server api.Server
-}
-
-func (a *Application) connectDefaultDatabase(config *configuration.Configuration) (*sql.DB, error) {
+func connectDefaultDatabase(config *configuration.Configuration) (*sql.DB, error) {
 	return sql.Open("postgres", config.ConnectionString.Default)
 }
 
-func (a *Application) serverInit() {
+func serverInit() {
 	configuration, err := configuration.NewConfiguration()
 	if err != nil {
 		panic(err.Error())
 	}
 	config = configuration
 
-	db, err := a.connectDefaultDatabase(configuration)
+	db, err := connectDefaultDatabase(configuration)
 	if err != nil {
 		panic(err.Error())
 	}
 
 	userRepository := repository.NewTokopediaUserRepository(db)
 	userService := service.NewUserService(configuration, userRepository)
+	mainService := service.NewMainService(configuration)
 
 	nsqModule := gnsq.NewNSQModule(configuration)
 	if nsqModule.Configuration.NSQ.Enabled == true {
 		nsqModule.InitNSQProducer()
 	}
 
-	server := api.NewServer(configuration, nsqModule, userService)
-	a.Server = *server
-}
+	server := api.NewServer(
+		configuration,
+		nsqModule,
+		userService,
+		mainService,
+	)
 
-func main() {
-	a := Application{}
-	a.serverInit()
-
-	//NSQ check
-	if a.Server.NsqModule.Configuration.NSQ.Enabled == true {
-		//test
-		/*err := api.SERVER.NsqModule.Producer["Server1"].Publish("TOPIC1", []byte("ini paket yang dikirim"))
-		if err != nil {
-			panic(err)
-		}*/
-
+	if nsqModule.Configuration.NSQ.Enabled == true {
 		//add cunsomer
 		consumer.InitConsumer()
 	}
 
-	a.Server.Run()
+	nsqPublisherInit(server)
+
+	server.Run()
+}
+
+func nsqPublisherInit(server *api.Server) {
+	server.MainService.InitNsqPublisher(api.SERVER.NsqModule.Producer["ServerLokal"], api.SERVER.NsqModule)
+}
+
+func main() {
+	serverInit()
 }

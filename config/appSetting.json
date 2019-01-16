@@ -1,6 +1,7 @@
 {
   "ConnectionString": {
-    "Default": "host=127.0.0.1 port=5432 dbname=KitaUndang user=postgres password=reza sslmode=disable"
+    "Default": "host=127.0.0.1 port=5432 dbname=tokopedia-user user=postgres password=reza sslmode=disable",
+    "DefaultX": "host=devel-postgre.tkpd port=5432 dbname=tokopedia-user user=tkpdtraining password=trainingyangbeneryah sslmode=disable"
   },
   "App": {
     "ServerAddress": "localhost",
@@ -14,7 +15,7 @@
       "Enabled": true
     },
     "Redis": {
-      "Url": "tcp://devel-redis.tkpd:6379/0?timeout=10s&maxidle=10",
+      "Url": "127.0.0.1:6379",
       "MaxActive": 100,
       "MaxIdle": 50
     },
@@ -27,7 +28,7 @@
     },
     "NSQD":
       {
-        "Server1": {
+        "ServerLokal": {
           "NsqdIP": "127.0.0.1",
           "NsqdTCPPort": "4150",
           "NsqdHTTPPort": "4151"
