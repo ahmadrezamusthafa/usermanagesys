@@ -1,7 +1,7 @@
 {
   "ConnectionString": {
-    "DefaultX": "host=127.0.0.1 port=5432 dbname=tokopedia-user user=postgres password=reza sslmode=disable",
-    "Default": "host=devel-postgre.tkpd port=5432 dbname=tokopedia-user user=tkpdtraining password=trainingyangbeneryah sslmode=disable"
+    "Default": "host=127.0.0.1 port=5432 dbname=tokopedia-user user=postgres password=reza sslmode=disable",
+    "DefaultX": "host=devel-postgre.tkpd port=5432 dbname=tokopedia-user user=tkpdtraining password=trainingyangbeneryah sslmode=disable"
   },
   "App": {
     "ServerAddress": "localhost",

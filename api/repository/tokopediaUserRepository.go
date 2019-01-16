@@ -168,11 +168,11 @@ func generateFilterWhereStatement(strColumn *map[string]interface{}) string {
 				strFormat := "%s%s=%v"
 				switch val.(type) {
 				case string:
-					str = fmt.Sprintf("'%s%v%s'", "%", val.(string), "%")
-					strFormat = "%slower(%s) like lower(%v)"
+					str = fmt.Sprintf("'%s%v%s'", "%", strings.ToLower(val.(string)), "%")
+					strFormat = "%slower(%s) like %v"
 				case *string:
-					str = fmt.Sprintf("'%s%v%s'", "%", *val.(*string), "%")
-					strFormat = "%slower(%s) like lower(%v)"
+					str = fmt.Sprintf("'%s%v%s'", "%", strings.ToLower(*val.(*string)), "%")
+					strFormat = "%slower(%s) like %v"
 				case int:
 					str = fmt.Sprintf("%v", val.(int))
 				case *int:
